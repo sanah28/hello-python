@@ -43,5 +43,21 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy') {
+            steps {
+                sshagent(['gce-ssh']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no sanahjhvr@34.14.195.25 "
+                            mkdir -p ~/app
+                            cd ~/app
+                            git clone -q https://github.com/sanah28/hello-python.git . 2>/dev/null || git pull
+                            python3 -m pip install --user flask pytest
+                            nohup python3 app.py > app.log 2>&1 &
+                        "
+                    '''
+                }
+            }
+        }
     }
 }
