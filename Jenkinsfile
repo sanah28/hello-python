@@ -46,13 +46,11 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sshagent(['gce-ssh']) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'gce-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
                     sh '''
-                        ssh -o StrictHostKeyChecking=no sanahjhvr@34.14.195.25 "
-                            mkdir -p ~/app
+                        ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER@34.14.195.25" "
                             cd ~/app
-                            git clone -q https://github.com/sanah28/hello-python.git . 2>/dev/null || git pull
-                            python3 -m pip install --user flask pytest
+                            git pull
                             nohup python3 app.py > app.log 2>&1 &
                         "
                     '''
